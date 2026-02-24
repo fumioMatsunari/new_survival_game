@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サバイバル翻訳ゲーム</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #2c3e50; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #34495e; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        h1 { color: #f1c40f; }
+        #hp-display { font-size: 24px; margin-bottom: 20px; color: #e74c3c; }
+        #question-box { font-size: 20px; margin: 20px 0; min-height: 60px; line-height: 1.5; background: #2c3e50; padding: 15px; border-radius: 10px; }
+        input[type="text"] { width: 80%; padding: 12px; font-size: 18px; border-radius: 5px; border: none; outline: none; }
+        button { padding: 12px 25px; font-size: 18px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; transition: 0.3s; }
+        button:hover { background: #2ecc71; }
+        #message { margin-top: 20px; font-weight: bold; min-height: 24px; }
+        .hint { font-size: 14px; color: #bdc3c7; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏝️ サバイバル翻訳</h1>
+    <div id="hp-display">生命力: ❤️❤️❤️</div>
+    
+    <div id="game-area">
+        <p>【お題を英語で伝えろ！】</p>
+        <div id="question-box"></div>
+        <input type="text" id="answer-input" placeholder="Type your English here..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer()">送信！</button>
+        <div id="message"></div>
+        <div id="hint-box" class="hint"></div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { jp: "お腹が空いた。何か食べ物が欲しい。", keywords: ["hungry", "food", "eat"], hint: "キーワード: hungry, food" },
+        { jp: "出口はどこですか？迷子です。", keywords: ["exit", "where", "lost"], hint: "キーワード: where, exit" },
+        { jp: "助けて！メディカルキットが必要です。", keywords: ["help", "medical", "doctor", "medicine"], hint: "キーワード: help, medical" },
+        { jp: "これはいくらですか？高いですね。", keywords: ["how much", "price", "expensive"], hint: "キーワード: how much, expensive" }
+    ];
+
+    let currentIdx = 0;
+    let hp = 3;
+
+    function updateDisplay() {
+        if (hp <= 0) {
+            document.getElementById("game-area").innerHTML = "<h2>💀 GAME OVER</h2><p>言葉が通じず、力尽きた...</p><button onclick='location.reload()'>再挑戦</button>";
+            return;
+        }
+        if (currentIdx >= questions.length) {
+            document.getElementById("game-area").innerHTML = "<h2>🎉 CLEAR!</h2><p>あなたは無事に生き延びた！</p><button onclick='location.reload()'>もう一度遊ぶ</button>";
+            return;
+        }
+        document.getElementById("question-box").innerText = questions[currentIdx].jp;
+        document.getElementById("hp-display").innerText = "生命力: " + "❤️".repeat(hp);
+        document.getElementById("hint-box").innerText = "";
+    }
+
+    function checkAnswer() {
+        const input = document.getElementById("answer-input").value.toLowerCase();
+        const currentQ = questions[currentIdx];
+        
+        // 入力の中にキーワードが1つ以上含まれているか判定
+        const found = currentQ.keywords.filter(word => input.includes(word));
+
+        if (found.length >= 1) {
+            document.getElementById("message").style.color = "#2ecc71";
+            document.getElementById("message").innerText = "⭕ 通じた！相手が理解してくれた。";
+            currentIdx++;
+            setTimeout(() => {
+                document.getElementById("answer-input").value = "";
+                document.getElementById("message").innerText = "";
+                updateDisplay();
+            }, 1500);
+        } else {
+            hp--;
+            document.getElementById("message").style.color = "#e74c3c";
+            document.getElementById("message").innerText = "❌ 通じない... 相手が困惑している。";
+            document.getElementById("hint-box").innerText = "ヒント: " + currentQ.hint;
+            updateDisplay();
+        }
+    }
+
+    // エンターキーでも送信できるようにする
+    document.getElementById("answer-input").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") checkAnswer();
+    });
+
+    updateDisplay();
+</script>
+
+</body>
+</html>
